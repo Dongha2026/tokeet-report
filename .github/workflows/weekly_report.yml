@@ -1,0 +1,24 @@
+name: Weekly Booking Report
+
+on:
+  schedule:
+    # Moi thu 2 luc 8:00 SA Viet Nam (UTC+7) = 01:00 UTC
+    - cron: '0 1 * * 1'
+  workflow_dispatch:  # Cho phep chay thu cong
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run weekly report
+        run: python tokeet_lark_report.py
