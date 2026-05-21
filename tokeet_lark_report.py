@@ -58,15 +58,17 @@ def normalize_channel(src):
     return src or "Khác"
 
 def normalize_villa(rental):
+    import re
     if not rental: return "Khác"
-    # "HA1 - The Country House - 7BR" → "The Country House"
-    # Strip leading "HAx - " prefix and trailing " - xBR" suffix
-    parts = rental.split(" - ")
-    if len(parts) >= 3:
-        return " - ".join(parts[1:-1]).strip()
-    if len(parts) == 2:
-        return parts[1].strip()
-    return rental.strip()
+    # Remove leading property code: "HA1 - ", "DN1- ", "HA2 - " ...
+    name = re.sub(r'^[A-Z]{0,3}\d+[-\s]+', '', rental).strip()
+    # Remove leading " - " if present after code stripping
+    name = re.sub(r'^-\s*', '', name).strip()
+    # Remove trailing bedroom count: " - 5BR", " - 7BR "
+    name = re.sub(r'\s*-\s*\d+BR\s*$', '', name, flags=re.IGNORECASE).strip()
+    # Remove trailing "·4BR" style (no dash)
+    name = re.sub(r'\s*·\s*\d+BR\s*$', '', name, flags=re.IGNORECASE).strip()
+    return name or rental.strip()
 
 def aggregate(bookings, d_from, d_to):
     channels = {}   # channel -> {bookings, revenue, cancels, cancel_rev}
