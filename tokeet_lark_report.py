@@ -188,11 +188,23 @@ def log(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
 
 # ── Main ──────────────────────────────────────────────────────────────────────
+def already_sent_this_week(week_label):
+    """Kiem tra xem tuan nay da gui bao cao chua (tranh gui 2 lan)."""
+    flag_file = Path("/tmp/tokeet_report_last_week.txt")
+    if flag_file.exists() and flag_file.read_text().strip() == week_label:
+        return True
+    flag_file.write_text(week_label)
+    return False
+
 def main():
     d_from, d_to = last_week_range()
     wk_num       = d_from.isocalendar()[1]
     week_label   = f"Tuần {wk_num}/{d_from.year} ({d_from.strftime('%d/%m')} - {d_to.strftime('%d/%m')})"
     log(f"=== {week_label} ===")
+
+    if already_sent_this_week(week_label):
+        log("Da gui bao cao tuan nay roi, bo qua.")
+        return
 
     bks = fetch_bookings(d_from)
     totals, channels, villas = aggregate(bks, d_from, d_to)

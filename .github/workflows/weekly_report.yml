@@ -4,6 +4,8 @@ on:
   schedule:
     # Moi thu 2 luc 8:00 SA Viet Nam (UTC+7) = 01:00 UTC
     - cron: '0 1 * * 1'
+    # Backup 8:30 SA phong khi GitHub bi tre
+    - cron: '30 1 * * 1'
   workflow_dispatch:  # Cho phep chay thu cong
 
 jobs:
