@@ -188,23 +188,23 @@ def log(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
 
 # ── Main ──────────────────────────────────────────────────────────────────────
-def already_sent_this_week(week_label):
-    """Kiem tra xem tuan nay da gui bao cao chua (tranh gui 2 lan)."""
-    flag_file = Path("/tmp/tokeet_report_last_week.txt")
-    if flag_file.exists() and flag_file.read_text().strip() == week_label:
-        return True
-    flag_file.write_text(week_label)
-    return False
+def is_monday_vietnam():
+    """Kiem tra hom nay co phai thu 2 theo gio Viet Nam (UTC+7) khong."""
+    vn_time = datetime.utcnow() + timedelta(hours=7)
+    return vn_time.weekday() == 0  # 0 = Monday
 
 def main():
+    # Chi gui bao cao vao thu 2 (tru khi chay thu cong --force)
+    force = len(sys.argv) > 1 and sys.argv[1] == "--force"
+    if not force and not is_monday_vietnam():
+        vn_time = datetime.utcnow() + timedelta(hours=7)
+        log(f"Hom nay la {vn_time.strftime('%A')} - khong phai thu 2, bo qua.")
+        return
+
     d_from, d_to = last_week_range()
     wk_num       = d_from.isocalendar()[1]
     week_label   = f"Tuần {wk_num}/{d_from.year} ({d_from.strftime('%d/%m')} - {d_to.strftime('%d/%m')})"
     log(f"=== {week_label} ===")
-
-    if already_sent_this_week(week_label):
-        log("Da gui bao cao tuan nay roi, bo qua.")
-        return
 
     bks = fetch_bookings(d_from)
     totals, channels, villas = aggregate(bks, d_from, d_to)
